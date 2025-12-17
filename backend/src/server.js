@@ -8,6 +8,6 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-app.listen(PORT, ()=>(
-    console.log(`🚀 Server Running on Port http://localhost:${PORT}`)
-));
+app.listen(PORT, () =>
+  console.log(`🚀 Server Running on Port http://localhost:${PORT}`)
+);

@@ -17,8 +17,6 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
-app.get("/", (req, res)=>(
-    res.send("API is running...")
-));
+app.get("/", (req, res) => res.send("API is running..."));
 
 export default app;
