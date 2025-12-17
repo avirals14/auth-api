@@ -49,80 +49,106 @@ export const signup = async (req, res) => {
         createdAt: newUser.createdAt,
       },
     });
-
   } catch (error) {
     console.error("Signup Error : ", error);
     return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
 
-
 export const login = async (req, res) => {
-    try {
-        const {email, password} = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if(!email || !password){
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
-
-        const user = await UserModel.findOne({email}).select("+password");
-
-        if(!user){
-            return res.status(401).json({
-                success: false,
-                message: "User not found",
-            });
-        }
-
-        const isPasswordMatch = await user.comparePassword(password);
-
-        if(!isPasswordMatch){
-            return res.status(401).json({
-                success: false,
-                message: "Invalid password",
-            });
-        }
-
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
-
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
-
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 60 * 1000, // 15 minutes
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "Login successful",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                createdAt: user.createdAt,
-            },
-        });
-    } catch (error) {
-        console.error("Login Error : ", error);
-        return res.status(500).json({
-            success: false,
-            message: "Login failed due to server error",
-            error: error.message,
-        });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
-}
+
+    const user = await UserModel.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const isPasswordMatch = await user.comparePassword(password);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Login Error : ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Login failed due to server error",
+      error: error.message,
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.error("Logout Error : ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed due to server error",
+      error: error.message,
+    });
+  }
+};
